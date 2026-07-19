@@ -71,6 +71,24 @@ export default function App() {
   const [ticker, setTicker] = useState([]);
   const [verifyState, setVerifyState] = useState({});
   const [settleState, setSettleState] = useState({});
+  const [walletAddress, setWalletAddress] = useState(null);
+  const [walletError, setWalletError] = useState("");
+
+  const connectWallet = async () => {
+    try {
+      const provider = window.solana;
+      if (!provider || !provider.isPhantom) {
+        setWalletError("Phantom wallet not found");
+        return;
+      }
+      const resp = await provider.connect();
+      setWalletAddress(resp.publicKey.toString());
+      setWalletError("");
+    } catch (err) {
+      setWalletError("Connection rejected");
+    }
+  };
+
 
   useEffect(() => {
     let cancelled = false;
@@ -164,7 +182,30 @@ export default function App() {
       <header style={styles.hero}>
         <div style={styles.heroGlow} />
         <div style={styles.heroInner}>
-          <div style={styles.eyebrow}>TXLINE × SOLANA — WORLD CUP 2026 · PREDICTION MARKETS & SETTLEMENT</div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+            <div style={styles.eyebrow}>TXLINE × SOLANA — WORLD CUP 2026 · PREDICTION MARKETS & SETTLEMENT</div>
+            <button
+              onClick={connectWallet}
+              style={{
+                background: walletAddress ? "#0F2A20" : "transparent",
+                border: "1px solid #FFB347",
+                color: "#FFB347",
+                borderRadius: "8px",
+                padding: "6px 14px",
+                fontSize: "11px",
+                fontFamily: "'Oswald', sans-serif",
+                letterSpacing: "1px",
+                cursor: "pointer",
+              }}
+            >
+              {walletAddress
+                ? `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`
+                : "CONNECT WALLET"}
+            </button>
+          </div>
+          {walletError && (
+            <div style={{ color: "#FF6B6B", fontSize: "11px", marginTop: "6px" }}>{walletError}</div>
+          )}
           <h1 style={styles.heroTitle}>Every odds shift.<br /><span style={styles.heroTitleAccent}>Signed, timestamped, unforgeable.</span></h1>
           <p style={styles.heroSub}>Matchday Ledger turns TxLINE's live World Cup feed into a market you can watch — and a record you can independently verify. Every hash below is computed for real, in your browser, right now.</p>
           <div style={styles.statRow}>
