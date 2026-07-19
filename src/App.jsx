@@ -71,6 +71,25 @@ export default function App() {
   const [ticker, setTicker] = useState([]);
   const [verifyState, setVerifyState] = useState({});
   const [settleState, setSettleState] = useState({});
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/fixtures")
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled || !Array.isArray(data) || data.length === 0) return;
+        const real = data.slice(0, 6).map((f, i) => {
+          const status = i < 3 ? "LIVE" : i < 5 ? "UPCOMING" : "FT";
+          return makeMatch(f.FixtureId, [f.Participant1, f.Participant2], status);
+        });
+        setMatches(real);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const tickerId = useRef(0);
   const chainId = useRef(0);
 
