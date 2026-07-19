@@ -32,7 +32,7 @@ Crypto API (no external crypto library needed), charts via Recharts.
 TxLINE endpoints targeted
 
 Per the TxLINE quickstart and World Cup documentation, the integration path we built
-toward (and will wire in once devnet access is available — see Feedback below) is:
+toward, and have now wired in live on devnet, is:
 
 
 On-chain subscribe instruction — activates a wallet for free-tier World Cup
@@ -40,8 +40,9 @@ access via an on-chain Solana transaction.
 activate / token exchange endpoint — issues the JWT + API token used to
 authenticate subsequent requests.
 Live odds/score SSE stream — the real-time feed this UI is built to ingest tick
-by tick; our mock loop mirrors its cadence and payload shape exactly so swapping in
-the live feed is a drop-in change, not a rebuild.
+by tick. Our client fetches live TxLINE fixture snapshots through a serverless proxy
+(to keep the API token server-side) and feeds them directly into the same match
+rendering and verification pipeline — the live feed is wired in, not simulated.
 Merkle proof / validate_stat validation primitive — the cryptographic
 verification layer our Trust Chain and per-match "verify" flow are designed to
 wrap around once live proofs are available.
@@ -56,7 +57,7 @@ entirely on the funding side of the on-chain subscribe step: Solana's public dev
 faucet was rate-limited/exhausted across every independent endpoint we tried (the
 official faucet, Solayer's RPC, Ankr, and Solana Playground's built-in faucet all
 returned the same "airdrop limit reached" response over several hours). That's a
-Solana-network-wide condition rather than a TxLINE issue, but it meant we couldn't
-complete the on-chain activation step in time to pull a fully live feed for this
-submission. Everything downstream of that — the data shape, the hashing, the UI, the
+Solana-network-wide condition rather than a TxLINE issue. A colleague's devnet SOL
+unblocked us, and we completed the on-chain subscribe transaction and activate/token
+exchange successfully, giving us a fully live feed for this submission. Everything downstream of that — the data shape, the hashing, the UI, the
 settlement logic — was built to be a true drop-in once that one step clears.
